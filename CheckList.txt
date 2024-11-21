@@ -1,0 +1,16 @@
+Users.js - user.model
+    - Get , Get By ID ✔
+    - Post ✔
+    - Put ✔
+    - Delete ✔
+
+Products.js - product.model
+    - Get , Get By ID ✔
+    - Post ✔
+    - Put ✔
+    - Delete ✔
+    
+Orders.js - order.model
+    - Get , Get By ID ✔
+    - Post ✔
+    - สร้าง order เสร็จแล้วลบข้อมูล amount ใน products
