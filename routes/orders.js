@@ -40,27 +40,40 @@ router.post("/", async function (req, res, next) {
   try {
     let FoundAllProduct = true;
     let HaveStock = true;
-    let NotFoundStock = [];
+    let NotFound = [];
+    let NoStock = [];
     // Check if all products exist and have enough stock
     for (const item of products) {
       const product = await productSchema.findOne({
         productName: item.productName,
       });
       if (!product) {
-        return res
-          .status(404)
-          .send({ error: `Product with name ${item.productName} not found` });
+        FoundAllProduct = false;
+        NotFound.unshift(item.productName);
+        continue;
       }
-      if(item.amount <1) {
-        return res
-        .status(400)
-        .send({ error: `Amount can't be lower than 0`})
-      }
-      if (product.stock < item.amount) {
+      if (item.amount < 1) {
         return res
           .status(400)
-          .send({ error: `Not enough stock for product ${item.productName}. There are only ${product.stock} left.`});
+          .send({ error: `Amount of product can't be lower than 0` });
       }
+      if (product.stock < item.amount) {
+        HaveStock = false;
+        NoStock.push(
+          `Not enough stock for product ${item.productName}. There are only ${product.stock} left.`
+        );
+      }
+    }
+    if (FoundAllProduct == false) {
+      return res.status(404).send({
+        message: "Please check again if productName is Correct.",
+        error: `Product with name ${NotFound} not found`,
+      });
+    }
+    if (HaveStock == false) {
+      return res
+        .status(400)
+        .send({ message: `Please Create Order Again.`, error: NoStock });
     }
 
     // Create the order

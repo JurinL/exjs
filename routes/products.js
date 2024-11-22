@@ -2,7 +2,6 @@ var express = require("express");
 var router = express.Router();
 var productSchema = require("../models/product.model");
 
-
 // GET all products
 router.get("/", async function (req, res, next) {
   let products = await productSchema.find({});
@@ -45,8 +44,15 @@ router.post("/", async function (req, res, next) {
   });
 
   try {
+    if (newProduct.price < 0 || newProduct.stock < 0) {
+      return res
+        .status(400)
+        .send({ error: "Product price or stock can't be lower than 1" });
+    }
     await newProduct.save();
-    res.status(201).send(newProduct);
+    res
+      .status(201)
+      .send({ message: "Create Product Success!", data: newProduct });
   } catch (error) {
     res.status(400).send(error);
   }
@@ -66,7 +72,9 @@ router.put("/:productId", async function (req, res, next) {
 
 // Delete product
 router.delete("/:productId", async function (req, res, next) {
-  let product = await productSchema.findOneAndDelete({ productId: req.params.productId });
+  let product = await productSchema.findOneAndDelete({
+    productId: req.params.productId,
+  });
 
   res.send(product);
 });
