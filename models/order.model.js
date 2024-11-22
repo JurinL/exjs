@@ -10,7 +10,7 @@ const productordersSchema = new Schema({
 const orderSchema = new Schema(
   {
     orderId: { type: Number, unique: true },
-    buyer_name: { type: String, required: true },
+    buyer_name: { type: String },
     products: [productordersSchema],
     total: { type: Number },
   },
