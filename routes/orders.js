@@ -42,14 +42,13 @@ router.post("/", async function (req, res, next) {
     let HaveStock = true;
     let NotFound = [];
     let NoStock = [];
-    // Check if all products exist and have enough stock
     for (const item of products) {
       const product = await productSchema.findOne({
         productName: item.productName,
       });
       if (!product) {
         FoundAllProduct = false;
-        NotFound.unshift(item.productName);
+        NotFound.push(item.productName);
         continue;
       }
       if (item.amount < 1) {
