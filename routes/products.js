@@ -9,11 +9,9 @@ router.get("/", async function (req, res, next) {
 });
 
 //Get product by productId
-router.get("/:productId", async function (req, res, next) {
+router.get("/:id", async function (req, res, next) {
   try {
-    const product = await productSchema.findOne({
-      productId: req.params.productId,
-    });
+    const product = await productSchema.findById(req.params.id);
     if (!product) {
       return res.status(400).send({
         message: "id Invalid",
@@ -59,11 +57,11 @@ router.post("/", async function (req, res, next) {
 });
 
 // Update product data
-router.put("/:productId", async function (req, res, next) {
+router.put("/:id", async function (req, res, next) {
   let { productName, description, price, stock } = req.body;
 
-  let product = await productSchema.findOneAndUpdate(
-    { productId: req.params.productId },
+  let product = await productSchema.findByIdAndUpdate(
+    req.params.id,
     { productName, description, price, stock },
     { new: true }
   );
@@ -71,10 +69,8 @@ router.put("/:productId", async function (req, res, next) {
 });
 
 // Delete product
-router.delete("/:productId", async function (req, res, next) {
-  let product = await productSchema.findOneAndDelete({
-    productId: req.params.productId,
-  });
+router.delete("/:id", async function (req, res, next) {
+  let product = await productSchema.findByIdAndDelete(req.params.id);
 
   res.send(product);
 });

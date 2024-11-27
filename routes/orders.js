@@ -10,22 +10,16 @@ router.get("/", async function (req, res, next) {
 });
 
 //Get order by orderId
-router.get("/:orderId", async function (req, res, next) {
+router.get("/:id", async function (req, res, next) {
   try {
-    const order = await orderSchema.findOne({
-      orderId: req.params.orderId,
-    });
+    const order = await orderSchema.findById(req.params.id);
     if (!order) {
       return res.status(400).send({
         message: "id Invalid",
         success: false,
       });
     }
-    return res.status(200).send({
-      data: order,
-      message: "success",
-      success: true,
-    });
+    return res.status(200).send(order);
   } catch (error) {
     return res.status(500).send({
       message: "server error",
@@ -34,63 +28,135 @@ router.get("/:orderId", async function (req, res, next) {
   }
 });
 
-// Create order Data
+// Get products from specific order
+router.get("/:id/products", async function (req, res, next) {
+  try {
+    const order = await orderSchema.findById(req.params.id);
+    if (!order) {
+      return res.status(404).send({
+        message: "Order not found",
+        success: false,
+      });
+    }
+
+    const productDetails = [];
+    for (const item of order.items) {
+      const product = await productSchema.findOne({ productName: item.productName });
+      if (product) {
+        productDetails.push({
+          productName: product.productName,
+          quantity: item.quantity,
+          price: product.price,
+          subtotal: product.price * item.quantity
+        });
+      }
+    }
+
+    return res.status(200).send(productDetails);
+  } catch (error) {
+    return res.status(500).send({
+      message: "Server error",
+      error: error.message,
+      success: false,
+    });
+  }
+});
+
+// Enhanced POST endpoint for Vue.js frontend
 router.post("/", async function (req, res, next) {
-  const { products } = req.body;
   try {
     let FoundAllProduct = true;
     let HaveStock = true;
     let NotFound = [];
     let NoStock = [];
-    for (const item of products) {
+    
+    // Destructure data from Vue.js frontend
+    const { items, totalAmount } = req.body;
+
+    if (!items || !Array.isArray(items)) {
+      return res.status(400).send({
+        message: "Invalid order format. Items array is required",
+        success: false
+      });
+    }
+
+    // Validate each product
+    for (const item of items) {
       const product = await productSchema.findOne({
         productName: item.productName,
       });
+      
       if (!product) {
         FoundAllProduct = false;
         NotFound.push(item.productName);
         continue;
       }
-      if (item.amount < 1) {
-        return res
-          .status(400)
-          .send({ error: `Amount of product can't be lower than 0` });
+
+      if (item.quantity < 1) {
+        return res.status(400).send({ 
+          message: "Invalid quantity",
+          error: `Amount of product can't be lower than 0`,
+          success: false
+        });
       }
-      if (product.stock < item.amount) {
+
+      if (product.stock < item.quantity) {
         HaveStock = false;
         NoStock.push(
           `Not enough stock for product ${item.productName}. There are only ${product.stock} left.`
         );
       }
     }
-    if (FoundAllProduct == false) {
+
+    if (!FoundAllProduct) {
       return res.status(404).send({
         message: "Please check again if productName is Correct.",
         error: `Product with name ${NotFound} not found`,
+        success: false
       });
     }
-    if (HaveStock == false) {
-      return res
-        .status(400)
-        .send({ message: `Please Create Order Again.`, error: NoStock });
-    }
 
-    // Create the order
-    const newOrder = new orderSchema({ products });
-    await newOrder.save();
-
-    // Update the stock for each product
-    for (const item of products) {
-      const product = await productSchema.findOne({
-        productName: item.productName,
+    if (!HaveStock) {
+      return res.status(400).send({ 
+        message: `Please Create Order Again.`, 
+        error: NoStock,
+        success: false 
       });
-      product.stock -= item.amount;
-      await product.save();
     }
 
-    res.status(201).send(newOrder);
+    // Create order object with frontend data
+    const orderData = {
+      items,
+      totalAmount,
+      orderDate: new Date(),
+      status: 'pending'
+    };
+
+    // Save the order
+    const order = new orderSchema(orderData);
+    const savedOrder = await order.save();
+
+    // Update product stock
+    // for (const item of items) {
+    //   const product = await productSchema.findOne({
+    //     productName: item.productName,
+    //   });
+    //   product.stock -= item.quantity;
+    //   await product.save();
+    // }
+
+    res.status(201).send({
+      data: savedOrder,
+      message: "Order created successfully",
+      success: true
+    });
+    
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).send({
+      message: "Error creating order",
+      error: error.message,
+      success: false
+    });
   }
 });
 
