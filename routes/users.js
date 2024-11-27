@@ -9,10 +9,10 @@ router.get("/", async function (req, res, next) {
   res.send(users);
 });
 
-// Get user by userId
-router.get("/:userId", async function (req, res, next) {
+// Get user by Id
+router.get("/:id", async function (req, res, next) {
   try {
-    const user = await User.findOne({ userId: req.params.userId });
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(400).send({
         message: "id Invalid",
@@ -54,11 +54,11 @@ router.post("/", async function (req, res, next) {
 });
 
 // Update User data
-router.put("/:userId", async function (req, res, next) {
+router.put("/:id", async function (req, res, next) {
   let { name, surname, age, sex } = req.body;
 
-  let user = await User.findOneAndUpdate(
-    { userId: req.params.userId },
+  let user = await User.findByIdAndUpdate(
+    req.params.id,
     { name, surname, age, sex },
     { new: true }
   );
@@ -66,9 +66,8 @@ router.put("/:userId", async function (req, res, next) {
 });
 
 // Delete User
-router.delete("/:userId", async function (req, res, next) {
-  let user = await User.findOneAndDelete({ userId: req.params.userId });
-
+router.delete("/:id", async function (req, res, next) {
+  let user = await User.findByIdAndDelete(req.params.id);
   res.send(user);
 });
 
