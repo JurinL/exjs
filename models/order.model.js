@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+var id_implement = require("mongoose-sequence")(mongoose);
 
 const orderSchema = new Schema({
   items: [{
@@ -13,4 +14,5 @@ const orderSchema = new Schema({
   status: String
 });
 
+orderSchema.plugin(id_implement, {inc_field: 'orderId'});
 module.exports = mongoose.model("orders", orderSchema);

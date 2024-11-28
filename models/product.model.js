@@ -26,6 +26,10 @@ const productSchema = new Schema({
     required: true,
     default: 0,
   },
+  image: {
+    data: String,
+    contentType: String
+  }
 });
 
 productSchema.plugin(id_implement,{id:"productId",inc_field:"productId"});
