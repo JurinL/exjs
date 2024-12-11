@@ -27,7 +27,26 @@ router.get("/:id", async function (req, res, next) {
     });
   }
 });
-
+router.delete("/:id", async function (req, res, next) {
+  try {
+    const order = await orderSchema.findByIdAndDelete(req.params.id);
+    if (!order) {
+      return res.status(404).send({
+        message: "Order not found",
+        success: false,
+      });
+    }
+    return res.status(200).send({
+      message: "Order deleted successfully",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "server error",
+      success: false,
+    });
+  }
+});
 // Get products from specific order
 router.get("/:id/products", async function (req, res, next) {
   try {

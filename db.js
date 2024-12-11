@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
+const mongoURI = process.env.MONGO_URI || 'mongodb://mongodb:27017/mydatabase';
 
 mongoose.connect(mongoURI, {
-  // No need to include useNewUrlParser and useUnifiedTopology
 }).then(() => {
-  console.log('Connected to MongoDB');
+  console.log('Connected to MongoDB container');
 }).catch((err) => {
-  console.error('Failed to connect to MongoDB', err);
+  console.error('Failed to connect to MongoDB container', err);
 });
