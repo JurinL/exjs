@@ -1,9 +1,11 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-main().catch((err) => console.log(err))
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
 
-async function main() {
-    console.log(process.env.DB_HOST)
-    await mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`)
-    console.log("connect db success")
-}
+mongoose.connect(mongoURI, {
+  // No need to include useNewUrlParser and useUnifiedTopology
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('Failed to connect to MongoDB', err);
+});
