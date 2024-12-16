@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://mongodb:27017/mydatabase';
+const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mydatabase';
 
 mongoose.connect(mongoURI, {
 }).then(() => {
